@@ -6,7 +6,7 @@ For publications about and links to previous TermViz work, see http://www.imt.li
 
 Using and citing this work
 =========================
-TermViz is based on mostly publicly funded research and is free to use for any purpose (MIT Licenced) with excepoion for the small SNOMED CT content examples provided. 
+TermViz is based on mostly publicly funded research and is free to use for any purpose (MIT Licenced) with exception for the small SNOMED CT content examples provided. 
 SNOMED CT licencing information is available at http://www.ihtsdo.org/
 
 As researchers we always get happy when you use and cite our work when appropriate:
