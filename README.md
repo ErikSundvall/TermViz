@@ -1,6 +1,6 @@
 TermViz
 =======
-TermViz, terminology visualization component based on HTML5/JavaScript and D3
+TermViz, terminology visualization component based on HTML5/JavaScript and D3 http://d3js.org/
 
 For publications about and links to previous TermViz work, see http://www.imt.liu.se/~erisu/TermViz/
 
@@ -10,12 +10,13 @@ TermViz is based on mostly publicly funded research and is free to use for any p
 SNOMED CT licencing information is available at http://www.ihtsdo.org/
 
 As researchers we always get happy when you use and cite our work when appropriate:
+
 1.  Interactive Visualization and Navigation of Complex Terminology Systems, Exemplified by SNOMED CT. 
     Proceedings of MIE2006; 27-30 Aug, Maastricht, The Netherlands, p 851-856;
-    By: Sundvall E, Nyström M, Petersson H, Åhlfeldt H.
+    By: Sundvall E, NystrÃ¶m M, Petersson H, Ã…hlfeldt H.
     http://www.imt.liu.se/~erisu/2006/MIE2006SundvallTermViz.pdf
 2.  Applying visualization to support coherent terminology implementation and (secondary) use of clinical data.
-    By: Anne Randorff Højen, Erik Sundvall, Kirstine Rosenbeck Gøeg, Submitted to Medinfo 2013
+    By: Anne Randorff Rasmussen, Erik Sundvall, Kirstine Rosenbeck GÃ¸eg, Submitted to Medinfo 2013
 3.  TODO: Add SHI 2012-papers?
 
 The first paper explains the general visualization principles used.
