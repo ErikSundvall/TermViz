@@ -2,6 +2,8 @@ TermViz
 =======
 TermViz, terminology visualization component based on HTML5/JavaScript and D3 http://d3js.org/
 
+DEMO: http://htmlpreview.github.com/?https://github.com/ErikSundvall/TermViz/blob/master/termviz-test-1.html
+
 For publications about and links to previous TermViz work, see http://www.imt.liu.se/~erisu/TermViz/
 
 Using and citing this work
