@@ -1,0 +1,463 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>TermViz.js Test1</title>
+    <!--  script src="http://d3js.org/d3.v2.js"></script -->    
+    <script src="/js/d3.v2.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="least-common-parent.js"></script> 
+    <script src="termviz.js"></script> 
+   
+    <style type="text/css">
+
+/* Force layout (SNOMED CT graph)*/
+.node circle {
+  fill: #ffffff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.label>text {
+  text-anchor: middle; /* Place text centered ()instead of the default to the right of the node)*/  
+  font: 12px sans-serif;
+  display: none; /* Hide text as default */
+  /* display:inline; */ /* Show text as default */
+  
+  /* Avoid that the node texts don't get selected instead of the nodes (even though the text is on top)*/
+  pointer-events: none; 
+}
+
+#mainVis text {   
+  /* regarding below see http://stackoverflow.com/questions/826782/css-rule-to-disable-text-selection-highlighting */ 
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;  
+}
+
+.label>text.shadow {
+  stroke: #fff;
+  stroke-width: 3px;
+  stroke-opacity: .8;
+}
+
+.link {
+	  stroke: gray;
+	  fill: none;
+	  stroke-width: 2px;
+	}
+
+.link.crossLink {
+	  stroke: steelblue;
+	  fill: none;
+	  stroke-width: 0.5px;
+	  stroke-dasharray: 10,5;
+	}
+
+
+.label.active>.shadow {
+  stroke: #FFBF80;
+}
+.node.active circle {
+  fill: #FFBF80;
+}
+.link.active {
+  stroke: #FFBF80; /* TODO: Change to tinted dropshadow instead*/
+  fill: #FFBF80;
+}
+
+
+.label.active-incoming>.shadow {
+  stroke: #FFFF4D;
+  stroke-opacity: .4;
+}
+.node.active-incoming circle {
+  fill: #FFFF4D;
+}
+.link.active-incoming {
+  stroke: #FFFF4D; /* TODO: Change to tinted dropshadow instead*/
+}
+
+.label.active-outgoing>.shadow {
+  stroke: #FF9999;
+  stroke-opacity: .5;
+}
+.node.active-outgoing circle {
+  fill: #FF9999;
+}
+.link.active-outgoing {
+  stroke: #FF9999; /* TODO: Change to tinted dropshadow instead*/
+}
+
+.node.fixed> circle {
+  stroke-width: 3px;
+  stroke-dasharray: 8,1;
+  stroke-dashoffset: 10; 
+}
+
+
+
+/* for manually switched on labels */
+.showText>text {
+  display:inline;
+}
+
+.active text {
+  display:inline;
+}
+.active-incoming text {
+  display:inline;
+}
+.active-outgoing text {
+  display:inline;
+}
+.crosslinkTarget text{
+  display:inline;
+  fill:darkred;
+}
+
+.cp text{
+  display:inline;
+  font-weight: bold;
+  font-size: 12px
+}
+.lcp text{
+  display: inline;
+  font-weight: bold;
+  font-size: 16px
+}
+
+/* Arrow markers in is_a type of links*/
+#is_a {
+  fill: white;
+  stroke: gray;
+  stroke-width: 1.5;
+}
+#other {
+	  fill: none;
+	  stroke: gray;
+	  stroke-width: 2;
+}
+
+
+
+/*
+.active {
+  filter: url(#dropshadow);
+}
+*/
+
+
+/* Dendrogram tree layout (EHR document template tree)*/
+
+.treeNode {
+  font: 10px sans-serif;
+ }
+
+/* .treeNode:hover { filter: url(#dropshadow); } */ 
+.treeNode:hover text{ 
+  /*stroke: rgba(255,200,200,5);*/
+  fill: #000; 
+  font-weight: bold;
+}
+ 
+.treeNode circle {
+  /* pointer-events: none; */ 
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.treeNode:hover circle{
+  stroke-width: 2.5px;
+}
+
+.treeNode.activeTreeNode circle {
+  fill: #f88;
+}
+
+.treeLink {
+  stroke: lightgray;
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+.treeText.leaf {
+  fill: gray;
+}
+
+:hoover.treeText.leaf {
+  fill: black;
+}
+
+.treeText.node {
+  fill: gray;
+}
+
+
+.contentWidth {
+  /* border: 1px red solid; */
+  width: 100%;
+  align: center;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+#graphBox {
+  border: 1px gray solid;
+  height: 600px;
+}
+
+/* image { pointer-events: painted; } */
+/* image:hover { filter: url(#contour); } */
+
+#dataSources { display: table; width: 100%; }
+#dataSourceRow { display: table-row;}
+#documentTemplateSource { display: table-cell; width: 33%; }
+#focusSetManager { display: table-cell; width: 33%; }
+#terminologySource { display: table-cell; width: 33%; }
+
+</style>
+
+ </head>
+ <body>
+ 
+<div id="graphBox" class="contentWidth">
+
+</div>
+ 	
+<div id="dataSources" class="contentWidth">
+
+  <div id="documentTemplateSource">
+  	 <h3>Hierarchy (Document templates etc)</h3>
+  	 <button id="loadTemplatesButton" type="button">Show</button> 
+  	 <input type="radio" name="templateSource" value="nothing"> No hierarchy at all... </br>
+  	 ...or load hierarchy from</br> 
+  	 <input type="radio" name="templateSource" value="URI">URI: 
+  	 	<select id="templateUriDropdown" name="templateUriDropdown" >
+  			<option value="documentTree2.json?">documentTree2.json</option>
+  			<option value="documentTree.json">documentTree.json</option>
+	 	</select> ...or... </br>
+  	 <input type="radio" name="templateSource" value="templateUri" >URI: <input type="text" id="templateUriTextBox" name="templateUriTextBox" value="http://..." size="35"/> ...or... </br>
+  	 <input type="radio" name="templateSource" value="textarea" checked="checked">Textarea below <br>
+  	<textarea id="templateTextarea" rows="15">Content will be replaced by the variable defaultTemplate</textarea>
+ 	 <br/>
+  </div>
+  
+  <div id="focusSetManager">
+	  <h3>Focus Set</h3>
+  	  <input type="checkbox" id="focusSource" name="focusSource" value="activeTemplateNodes" checked="checked"> Auto-update from currently selected hierarchy nodes</input><br/>
+	  <textarea id="focusTextarea" rows="5">281233007,91689009,59820001</textarea><br/>
+	  <button id="focusButton" type="button">Highlight focus nodes in graph</button>
+  </div>
+  
+  <div id="terminologySource">  
+  	 <h3>Terminology/ontology directed graph (e.g. SNOMED CT)</h3>
+  	 <button id="clearButton" type="button">Clear terminology (SNOMED CT) content graph</button></br>
+  	 <input type="checkbox" checked="true" id="mergeCheckbox" value="serverResponse.json?">Merge duplicate nodes and links when loading new data</input>.<br/><br/>
+  	 <button id="loadTerminologyButton" type="button">Load</button> terminology from...</br> 
+  	 <input type="radio" name="terminologySource" value="staticURI" >URI: <input type="text" id="terminologyUriTextBox" name="templateUriTextBox" value="http://person2.hst.aau.dk/arra/VizProject/serverResponse.php?input=" size="35"/><br/>
+  	 <input type="radio" name="terminologySource" value="combinedURI" >The URI above, suffixed by the numbers in the focus set box</br>
+  	 <input type="radio" name="terminologySource" value="textarea" checked="checked">The textarea blow:</br>	  
+  	 <textarea id="jsonTextarea" rows="15">{"nodes":[{"id":"281233007","term":"Cardiovascular structure of trunk (body structure)","group":"1"},{"id":"22943007","term":"Trunk structure (body structure)","group":"1"},{"id":"38866009","term":"Body part structure (body structure)","group":"1"},{"id":"52530000","term":"Body region structure (body structure)","group":"1"},{"id":"91723000","term":"Anatomical structure (body structure)","group":"1"},{"id":"91722005","term":"Physical anatomical entity (body structure)","group":"1"},{"id":"123037004","term":"Body structure (body structure)","group":"1"},{"id":"138875005","term":"SNOMED CT Concept (SNOMED RT+CTV3)","group":"1"},{"id":"442083009","term":"Anatomical or acquired body structure (body structure)","group":"1"},{"id":"281827007","term":"Regional cardiovascular structure (body structure)","group":"1"},{"id":"113257007","term":"Structure of cardiovascular system (body structure)","group":"1"},{"id":"91689009","term":"Body system structure (body structure)","group":"1"},{"id":"91689009","term":"Body system structure (body structure)","group":"1"},{"id":"59820001","term":"Blood vessel structure (body structure)","group":"1"},{"id":"87784001","term":"Soft tissues (body structure)","group":"1"},{"id":"85756007","term":"Body tissue structure (body structure)","group":"1"},{"id":"113343008","term":"Body organ structure (body structure)","group":"1"}],"links":[{"source":"281233007","target":"22943007","linkName":"1"},{"source":"22943007","target":"38866009","linkName":"1"},{"source":"38866009","target":"52530000","linkName":"1"},{"source":"52530000","target":"91723000","linkName":"1"},{"source":"91723000","target":"91722005","linkName":"1"},{"source":"91722005","target":"123037004","linkName":"1"},{"source":"123037004","target":"138875005","linkName":"1"},{"source":"91723000","target":"442083009","linkName":"1"},{"source":"442083009","target":"123037004","linkName":"1"},{"source":"281233007","target":"281827007","linkName":"1"},{"source":"281827007","target":"113257007","linkName":"1"},{"source":"113257007","target":"91689009","linkName":"1"},{"source":"91689009","target":"91723000","linkName":"1"},{"source":"59820001","target":"87784001","linkName":"1"},{"source":"87784001","target":"85756007","linkName":"1"},{"source":"85756007","target":"91723000","linkName":"1"},{"source":"59820001","target":"113257007","linkName":"1"},{"source":"59820001","target":"113343008","linkName":"1"},{"source":"113343008","target":"91723000","linkName":"1"}]}</textarea>
+  </div>  
+   
+</div>
+
+   
+<script type="text/javascript">
+
+/** Configuration settings */
+/** @const */ 
+var settings = {
+	visualizationDomContainerSelector: '#graphBox' ,	
+	distance: {
+	    default: 50,
+		doi: {use: true, multiplicator: 10}
+	},
+	charge: {
+	    default: -200,
+		doi: {use: true, multiplicator: -300}
+	},
+	friction: 0.85, // 1=no friction, 0=nothing moves (glued stuck)
+	gravity: 0.05,
+	linkStrength: {
+	    is_a: 1,
+    	crossLink: 0.1,
+    	default: 0.5
+	}
+};
+
+/* ************************* Main control script ****************************** */
+
+//The $(document).ready jQuery function is run when the page has finished loading 
+$(document).ready(function(){
+	
+	console.log("Starting main control script... ");
+	$("textarea#templateTextarea").val(JSON.stringify(defaultTemplate));
+
+    vis = termviz(settings);
+    console.log("vis:", vis, vis.style("width"));
+
+    // run it once on startup
+    // termviz.dendrogram(vis); 
+
+
+// Attach event listeners
+$("#uriButton").click(function(){
+	  termviz.loadFromUri($("#uriField").val());	  
+});
+
+$("#loadTerminologyButton").click(function(){
+    var radioBtnVal = $('input:radio[name=terminologySource]:checked').val();	  
+    var mergeExisting = $("#mergeCheckbox").is(':checked')
+    //console.log("radioBtnVal",radioBtnVal);
+	  if (radioBtnVal=="staticURI"){
+		 termviz.loadFromUri($('#terminologyUriTextBox').val())
+	  } else if (radioBtnVal=="combinedURI"){
+       // console.log(radioBtnVal+" >>>>> " + $('#templateUriTextBox').val()+$('#focusTextarea').val();
+		 termviz.loadFromUri( $('#terminologyUriTextBox').val()+$('#focusTextarea').val());
+	  } else {
+		 // console.log(radioBtnVal+" >>>>> " + $("#jsonTextarea").val());
+		 termviz.loadFromObject($.parseJSON($("#jsonTextarea").val()));
+	  }	  
+});
+
+$("#clearButton").click(function(){	  
+	  termviz.clear();
+});
+  
+var dendro;
+
+  $("#loadTemplatesButton").click(function(){	
+	
+	if(dendro){
+		console.log("clearing dendrogram")
+		termviz.dendrogram.clear();
+	} else {
+		dendro = termviz.dendrogram(vis);
+	};	
+    
+    var radVal = $('input:radio[name=templateSource]:checked').val();	  
+	  if (radVal=="URI"){
+	     //console.log(radVal+" >>>>> " + $('#templateUriDropdown').val());
+	     d3.json($('#templateUriDropdown').val(), function(json){
+	    	termviz.dendrogram.draw(json);
+       });
+    } else if (radVal=="templateUri"){
+       //console.log(radVal+" >>>>> " + $('#templateUriTextBox').val());
+	     d3.json($('#templateUriTextBox').val(), function(json){
+	    	 termviz.dendrogram.draw(json);
+       });
+	} else if (radVal=="textarea"){
+	    // console.log(radVal+" >>>>> " + $("#templateTextarea").val());
+		  termviz.dendrogram.draw(JSON.parse($("#templateTextarea").val()));
+	} else {
+		// do nothing
+	}
+ });
+  
+  $('#focusButton').click(function(){
+	  //alert($('#focusTextarea').val());	  
+	  // lcpDecorator(linkArray, nodeArray, focusIdArray)
+	  var focusIdArray = $('#focusTextarea').val().split(",")
+	  	  
+	  // Mark focus nodes
+	  focusIdArray.forEach(function(dat){
+		  d3.select("#node_"+dat).classed("crosslinkTarget", true);
+		  d3.select("#label_"+dat).classed("crosslinkTarget", true);
+	  });
+	  
+	  var simplifiedLinks = termviz.links().map(function(lnk){
+		  return {source: lnk.source.id, target: lnk.target.id}
+	  })
+	  
+	  // consoleLCP(simplifiedLinks, focusIdArray)
+	  lcpDecorator(simplifiedLinks, termviz.nodes(), focusIdArray);
+	  //console.log(simplifiedLinks, termviz.links(), focusIdArray);
+	  //$('#nodeContainer .node').each(function(dat){ 
+	  termviz.nodes().forEach(function(dat){
+		  console.log("dat.cp, dat.lcp, dat", dat.cp, dat.lcp, dat.id, dat);
+		  if(dat.cp) {
+			  d3.select("#node_"+dat.id).classed("cp", true);
+			  d3.select("#label_"+dat.id).classed("cp", true);
+		  }
+		  if(dat.lcp) {
+			  d3.select("#node_"+dat.id).classed("lcp", true);
+			  d3.select("#label_"+dat.id).classed("lcp", true);
+		  }
+	  })
+  });
+  
+
+ //$("#loadTemplatesButton").click(); // Click it automagically once at startup
+ $("#loadTerminologyButton").click(); // Click it automagically once at startup
+   
+ termviz.restart();
+
+});
+
+
+  
+/* ************************* BIG BULKY DEFAULT CONTENT ****************************** */
+  
+var defaultTemplate = {
+		 "name": "Templates",
+		 "children": [
+		  {
+		   "name": "Template Lorem ipsum",
+		   "children": [
+		    {
+		     "name": "Subsection A",
+		     "children": [
+		      {"name": "dolor sit amet", "sctid": 281233007},
+		      {"name": "consectetur"},
+		      {"name": "adipisicing elit"},
+		      {"name": "sed do eiusmod"}
+		     ]
+		    },
+		    {
+		     "name": "Subsection B",
+		     "children": [
+		      {"name": "tempor incididunt"},
+		      {"name": "ut labore"},
+		      {"name": "et dolore"},
+		      {"name": "magna aliqua"},
+		      {"name": "Ut enim"}
+		     ]
+		    },
+		    {
+		     "name": "Subsection C",
+		     "children": [
+		      {"name": "ad minim veniam"}
+		     ]
+		    }
+		   ]
+		  },
+		  {
+		   "name": "Template quis nostrud",
+		   "children": [
+		    {
+		     "name": "Subsection X",
+		     "sctid": 91689009,
+		     "children": [
+		      {"name": "trunk", "sctid": 281233007},
+		      {"name": "exercitation ullamco"},
+		      {"name": "laboris nisi"},
+		      {"name": "vessel", "sctid": 59820001},
+		      {"name": "ut aliquip ex"}
+		     ]
+		    },
+		    {"name": "ea commodo"},
+		    {"name": "consequat"}
+		   ]
+		  }
+		 ]
+		};
+		
+    </script>
+  </body>
+</html>

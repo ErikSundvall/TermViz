@@ -1,0 +1,62 @@
+   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SNOVIEW</title>
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> 
+         <script src="least-common-parent.js"></script> 
+    </head>
+  
+  <body>
+  
+  <div id="demo"></div>
+  
+   <div id="wrapper">
+        <div id="header">
+          <div id="header-content">SNOVIEW </div></div>
+        <div id="content">
+            <div id="sidebar">
+             <div id="stylized" class="myform">
+    <form action="" method="GET">
+       Input  focus set (comma seperated): 
+      <textarea id="userInput" COLS=30 ROWS=6>59820001,281827007,22943007</textarea><br>
+     <button id="load" type="button">Load</button> 
+      </form>
+	<p>Output of this version willl be sent to console, so turn browser developer/debugging features on to see it<p>
+     </div>          
+            </div>
+            <div id="main">   
+             
+            </div>
+            
+      </div>
+        <div class="push"></div>
+    </div>
+    <div id="footer"><div id="footer-content">Anne Randorff HÃ¸jen. Aalborg Universitet & Erik Sundvall, Linköping University</div></div>
+  
+  </body>
+  
+  <script>
+  
+  document.getElementById("load").onclick=function(){run()};
+  
+  function run() {
+      //document.getElementById("main").innerHTML='i run';
+      var input = document.getElementById('userInput').value;	
+      
+      $.getJSON(
+      "http://person2.hst.aau.dk/arra/VizProject/serverResponse.php", // The server URL 
+      { input: input }, // Data you want to pass to the server.
+      function(data) { 	  
+		//Call to LCP function - input data is an array of nodes and an array of focus concept ids	  
+     		consoleLCP(data.links, input.split(','));
+    		console.log("---- LCPdecorator ----");        
+     		lcpDecorator(data.links, data.nodes, input.split(','))   
+		console.log("links, nodes: ", data.links, data.nodes)  	 
+  	  }); 	
+  }
+   
+  </script>
+</html>
+  
+  

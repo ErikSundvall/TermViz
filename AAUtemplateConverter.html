@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <title>AAU-template-format Converter</title>
+        <script src="http://d3js.org/d3.v2.js"></script> 
+    	<!-- <script src="/static/js/d3/d3-2.8.0/d3.v2.js"></script> -->
+        <style type="text/css">
+textarea
+{
+    width:100%;
+}
+		</style>
+    </head>
+    <body>
+        <h1>AAUtemplateConverter</h1>
+        <p>Input:<br/>
+ 		<textarea id="inputTextarea" rows="15">"organisation","template_ID","speciality_overview","speciality_specific","interface_term","datatype","h1","h2","h3","h4","concept_ID","sct_uk","sct_s","description","precise match"
+"Testby hospital",2,"generel","example","Phys","free_text",1,,,,405279007,"Attending physician",,,0
+"Testby hospital",2,"generel","example","Trial Subject","free_text",2,,,,110465008,"Clinical trials",,,0
+"Testby hospital",2,"generel","example","Anamnesis","organiser",5,,,,84100007,"History taking",,,1
+"Testby hospital",2,"generel","example","Intro","free_text",5,1,,,365854008,"History finding",,,0
+"Testby hospital",2,"generel","example","Allergy","list_one",5,2,,,106190000,"Allergic state",,,1
+"Testby hospital",2,"generel","example","Prev Hist","free_text",5,3,,,417662000,"History of clinical finding in subject",,,1
+"Testby hospital",2,"generel","example","Predisp","free_text",5,4,,,47708004,"Genetic predisposition","genetisk predisposition","tvivl om hvilken SCT-kode",0
+</textarea></p>
+ 	
+ 	<button id="convresionButton" type="button"  onclick="parseAndConvert()">Convert CSV above to a JSON tree structure</button>
+ 	
+    <p>Output:<br/>
+    <textarea id="outputTextarea" rows="15"></textarea></p>
+ 		
+ 	<script type="text/javascript">
+ 	 	
+ 	function parseAndConvert() {
+ 		var inString = d3.select("#inputTextarea").node().value; 		
+ 		var parseResult = d3.csv.parse(inString)
+ 		console.log("parseResult:", parseResult); 
+ 		
+ 		var parentMap = { children: []}; // A map containing all nodes that have children
+ 		var totalMap = {} // All node objects in associative array based on node ID
+ 		 		
+ 		// iterate over nodes
+ 		parseResult.forEach(function(d,i){ 			
+ 			// If this is the first row seen in a template, then add an entry to the parentMap representing the template itself
+ 			if(!parentMap[d.template_ID]){
+ 				parentMap[d.template_ID]={"id":d.template_ID, "datatype":"template_root" ,"name": d.organisation+" || "+d.speciality_overview+" || "+d.speciality_specific} ; // Collect all template IDs used
+ 				parentMap.children.push(parentMap[d.template_ID]);
+ 			}
+ 			
+ 			// Construct ID string
+ 			var id = d.template_ID+"."+d.h1;
+ 			if (d.h2) id = id+"."+d.h2;
+ 			if (d.h3) id = id+"."+d.h3;
+ 			if (d.h4) id = id+"."+d.h4;
+ 			
+ 			// The parent ID is found by removing last suffix
+ 			var parentId = id.substring(0, id.lastIndexOf("."));
+ 			
+ 			// Add the new additional IDs to the parsed datastructure
+ 			d.id = id;
+ 			d.parentId = parentId;
+ 			
+ 			// Create a node in desired target format 
+ 			var newNode = {"id":id, "name":d.interface_term, "datatype": d.datatype, "description":d.description, "precise_match": d["precise match"]};
+ 			if (d.concept_ID && d.concept_ID > 1000){ // Filter out AAU special use of sctid field for other purpose
+ 				newNode.sctid=d.concept_ID;
+ 			} else {
+ 				newNode.SPECIAL_CONCEPT_ID=d.concept_ID;
+ 			}
+ 			
+ 			totalMap[id] = newNode;
+ 			
+ 			console.log("id: ",id,", parentId: ",parentId,", parentMap: ",parentMap,", totalMap[parentId]: ",totalMap[parentId],", newNode: ",newNode,", totalMap: ",totalMap);
+ 			if (!parentMap[parentId]) parentMap[parentId] =  totalMap[parentId];
+ 			if (!parentMap[parentId].children) parentMap[parentId].children =  [];
+ 			
+ 			// Add the node to it's parents children-array
+ 			parentMap[parentId].children.push(newNode); 			 			
+ 			//console.log(d, i, id, parentId);
+ 			
+ 		})
+
+ 		console.log("parentMap:", parentMap, "totalMap['0']", JSON.stringify(totalMap["0"]));
+ 		
+ 		var tree = {name: "Root", id: "0", "children":parentMap.children}; //, parentMap.name, parentMap.children}
+		
+		d3.select("#outputTextarea").node().value = JSON.stringify(tree);
+ 		
+ 	};
+ 		
+ 	
+ 	</script>	
+
+    <p>Created by Erik Sundvall, November 2012, License: CC-BY or MIT whichever you happen to prefer</p>
+
+    </body>
+</html>

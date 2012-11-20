@@ -1,0 +1,290 @@
+   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- LINK href="stylesheet.css" rel="stylesheet" type="text/css" -->
+    <title>SNOVIEW</title>
+    <!-- script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script --> 
+       <!-- script type="text/javascript" src="http://mbostock.github.com/d3/d3.geom.js"></script --> 
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script --> 
+    <!-- script type="text/javascript" src="http://mbostock.github.com/d3/d3.layout.js"></script --> 
+    </head>
+  
+  <body>
+  
+  
+  
+  <div id="demo"></div>
+  
+   <div id="wrapper">
+        <div id="header">
+          <div id="header-content">SNOVIEW </div></div>
+        <div id="content">
+            <div id="sidebar">
+             <div id="stylized" class="myform">
+    <form action="" method="GET">
+       Input  focus set (comma seperated): 
+      <textarea id="userInput" COLS=30 ROWS=6>59820001, 281827007, 22943007</textarea><br>
+     <button id="load" type="button">Load</button> 
+      </form>
+     </div>          
+            </div>
+            <div id="main">   
+             
+            </div>
+            
+      </div>
+        <div class="push"></div>
+    </div>
+    <div id="footer"><div id="footer-content">Anne Randorff Højen. Aalborg Universitet</div></div>
+  
+  </body>
+  
+  <script>
+  
+  document.getElementById("load").onclick=function(){run()};
+  
+  function run() {
+      //document.getElementById("main").innerHTML='i run';
+      var input = document.getElementById('userInput').value;	
+      
+      $.getJSON(
+      "serverResponse.php", // The server URL 
+      { input: input }, // Data you want to pass to the server.
+      function(data) {
+     show(data, input);
+  
+  });
+      
+      
+          //document.getElementById("main").innerHTML='efter';
+  }
+      
+  function show(json, input) {
+      
+  	var data = JSON.stringify(json, null, 4);
+
+	var IC = input.split(',');
+
+  	paths = getPaths(IC, json);
+	document.getElementById("main").innerHTML+= " PATHS:<br />";
+	for (i=0;i<paths.length;i++)
+    {var d = JSON.stringify(paths[i], null, 4)  
+    document.getElementById("main").innerHTML+=i+"   >>>>>>>>   " +d +"<br /><br />";  
+    };
+	
+	cp = getCP(paths); 
+   	var b = JSON.stringify(cp, null, 4)
+	document.getElementById("main").innerHTML+= " COMMON Parents: "+b +"<br /><br />";
+ 	lcp = getLCP(cp, paths);
+ 	var c = JSON.stringify(lcp, null, 4)
+	document.getElementById("main").innerHTML+= " LCP: "+c +"<br /><br />";
+  }
+  
+
+  function getPaths(IC, treeObj){
+      
+       var arrayOfPaths = [];	
+       for (i=0;i<IC.length;i++)
+          { 
+              var relations = [];
+              id = IC[i];
+			   var step = 1;
+              parents = getParents(id, treeObj.links, relations, step);
+              
+              var path = {id: id, parents: parents};
+              arrayOfPaths.push(path);
+          }	
+    /* document.getElementById("main").innerHTML+=" Display the paths for three predefined input conceps: <br /><br />";
+    for (i=0;i<arrayOfPaths.length;i++)
+    {var d = JSON.stringify(arrayOfPaths[i], null, 4)  
+    document.getElementById("main").innerHTML+=i+"   >>>>>>>>   " +d +"<br /><br />";  
+    };*/
+          return arrayOfPaths;
+      }
+  
+  
+  
+  
+  function getParents(child, links, relations, step){
+       if(child != 138875005){
+              for(var i = 0, n = links.length; i < n; i++) {
+          
+                  if(links[i].source == child){
+                       
+                      var parent = links[i].target;
+                      var b=true;
+					  
+					  
+                      for (j=0; j<relations.length;j++){
+                          
+						  if(relations[j].source==child){
+							  step = relations[j].dist;
+							  }
+						  
+						  if(relations[j].target==parent){
+							  if(relations[j].source==child){
+							  b=false;
+                              }
+                          }             
+                      }
+                      
+					  if(b){		 
+                     		var relation = {source: child, target: parent, dist: step};
+                      		relations.push(relation);
+					  		step = step+1;
+					 		 getParents(parent, links, relations, step); 
+					  	}
+          
+                  }		
+              }
+       }
+       else if(child == 138875005){    
+           }
+      return relations;	
+      }
+          
+  
+  
+  function getCP(paths){
+     
+       var commonParents = [];
+     
+	  for (i1=0;i1<paths.length;i1++)
+          { 
+          for (i2=i1+1;i2<paths.length;i2++)
+                  {
+                      focusId1 = paths[i1].id;
+                      focusId2 = paths[i2].id;
+					  
+                      for (c1=0;c1<paths[i1].parents.length;c1++)
+                          { 
+                              id1 = paths[i1].parents[c1].target;
+                              //document.getElementById("main").innerHTML+=" Id1   >>>>>>>>   " + id1 +"<br />";		
+                      
+                              for (c2=0;c2<paths[i2].parents.length;c2++)
+                                  { 
+                                      id2 = paths[i2].parents[c2].target;
+                                      
+									  if(id1 == id2){
+										 var bool = true;
+										  // Hvis værdien allerede er commonParent skal den ikke tilføjes igen                               
+									  	for (j=0; j<commonParents.length;j++){
+                          					if(commonParents[j].id==id1){
+												//gem den mindste afstand
+												if(commonParents[j].dist> paths[i1].parents[c1].dist ){
+												commonParents[j].dist = paths[i1].parents[c1].dist;
+												}
+												bool=false;
+                              					}
+                      					}
+									 
+									 if(bool){
+										 var cp = {id: id1, dist: paths[i1].parents[c1].dist};
+										 commonParents.push(cp);
+										 }								 
+                                      //Slutter if - hvis der er fælles begreber i de 2 arrays (id1 og id2)
+                                      }			
+         							//Slutter for der kører igennem 2. array
+                                  }            
+                          //Slutter for der kører igennem første array
+						  }
+                  //slutter 2. for / bestemmer 2. array
+				  }                                      
+         //slutter første for / besttemer første array
+		  }	
+		  
+		  
+    return commonParents;
+	//Funktionen slutter  
+    }
+
+  function getLCP(cp, paths){
+	  var lcp = [];
+	 
+	  
+	  //gennemløber alle commonParents
+	   for (i=0;i<cp.length;i++)
+          { 
+		  var ic_array = [];
+		   cp_id = cp[i].id;
+		   
+		   
+		   //Gennemløber alle paths
+		   for (j=0;j<paths.length;j++)
+          { 
+		  ic_id = paths[j].id;
+		  		//gennemløber alle paths-parents
+	      		for (k=0; k<paths[j].parents.length;k++){
+					
+						  parent_id = paths[j].parents[k].target;
+						  
+						  if(cp_id==parent_id){	  
+							  
+							  var addIC = true;
+							  				
+							  for (m=0; m<ic_array.length;m++){
+								  if(ic_array[m] == ic_id){
+									    addIC = false;
+										break;
+									  }
+							  }
+							  if(addIC){
+							 	ic_array.push(ic_id);
+								break;
+								}						  
+						  //slutter if parent = cp
+						  }
+                      }
+		  		}
+	  
+	  			var c_lcp = {cp: cp_id, ic:ic_array, dist: cp[i].dist};
+	  			var newCandidate = true;
+							 
+							  //gennemløber lcp for at se om candidate lcp allerede er indeholdt i arrayet
+							  for (n=0; n<lcp.length;n++){
+								  if(lcp[n] == c_lcp){
+									   newCandidate = false;
+									   break;
+									  }
+								  
+								  if(lcp[n].ic.length == c_lcp.ic.length ){
+
+										   for (p=0; p<lcp[n].ic.length;p++){
+										   		for (s=0; s<c_lcp.ic.length;s++){
+										   		
+												if(lcp[n].ic[p]==lcp[n].ic[s]){
+													newCandidate = false;
+													}
+										   		}	
+										   }
+										   if(!newCandidate){
+											   // Hvis ovenstående sammenligning har fundet ud at interessebegreberne for de to arrays af sammelængde er ens - skal den kandidat med mindst afstand til interessebegreb beholdes.
+											   if(lcp[n].dist > c_lcp.dist){
+												   delete lcp[n];
+												   lcp.push(c_lcp);
+												   }
+											   
+											   }
+										   
+										  }					  
+							  }
+
+							  //Ny kandidat fundet
+							  if(newCandidate){
+								lcp.push(c_lcp);
+								//Slutter IF - new Candidate
+								}
+	  
+		  }
+		  		  		
+	  return lcp;
+	  }
+  
+  
+  </script>
+  
+  
+    </html>
+  
+  
