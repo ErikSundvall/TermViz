@@ -22,7 +22,7 @@ As researchers we always get happy when you use and cite our work when appropria
 3.  TODO: Add SHI 2012-papers?
 
 The first paper explains the general visualization principles used.
-The first paper explains the current implementation and target usecase.
+The second paper explains the current implementation and target usecase.
 
 MIT Licence
 ===========
