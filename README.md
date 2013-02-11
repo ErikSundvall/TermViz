@@ -23,6 +23,7 @@ As researchers we always get happy when you use and cite our work when appropria
 
 The first paper explains the general visualization principles used.
 The second paper explains the current implementation and target usecase.
+Further explanations and context can be found in chapter 3.1 of Erik Sundvalls PhD thesis at http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-87693
 
 MIT Licence
 ===========
