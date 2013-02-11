@@ -17,8 +17,8 @@ As researchers we always get happy when you use and cite our work when appropria
     Proceedings of MIE2006; 27-30 Aug, Maastricht, The Netherlands, p 851-856;
     By: Sundvall E, Nyström M, Petersson H, Åhlfeldt H.
     http://www.imt.liu.se/~erisu/2006/MIE2006SundvallTermViz.pdf
-2.  Applying visualization to support coherent terminology implementation and (secondary) use of clinical data.
-    By: Anne Randorff Rasmussen, Erik Sundvall, Kirstine Rosenbeck Gøeg, Submitted to Medinfo 2013
+2.  Visualizing sets of SNOMED CT concepts to support consistent terminology implementation and reuse of clinical data.
+    By: Anne Randorff Højen, Erik Sundvall, Kirstine Rosenbeck Gøeg, Submitted to Medinfo 2013
 3.  TODO: Add SHI 2012-papers?
 
 The first paper explains the general visualization principles used.
