@@ -17,9 +17,14 @@ As researchers we always get happy when you use and cite our work when appropria
     Proceedings of MIE2006; 27-30 Aug, Maastricht, The Netherlands, p 851-856;
     By: Sundvall E, Nyström M, Petersson H, Åhlfeldt H.
     http://www.imt.liu.se/~erisu/2006/MIE2006SundvallTermViz.pdf
-2.  Visualizing sets of SNOMED CT concepts to support consistent terminology implementation and reuse of clinical data.
-    By: Anne Randorff Højen, Erik Sundvall, Kirstine Rosenbeck Gøeg, Submitted to Medinfo 2013
-3.  TODO: Add SHI 2012-papers?
+2.  Methods and applications for visualization of SNOMED CT concept sets.
+    By: Anne Randorff Højen, Erik Sundvall, Kirstine Rosenbeck Gøeg
+    http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3974253/
+    http://dx.doi.org/10.4338/ACI-2013-09-RA-0071
+3.  Visualizing sets of SNOMED CT concepts to support consistent terminology implementation and reuse of clinical data.
+    By: Anne Randorff Højen, Erik Sundvall, Kirstine Rosenbeck Gøeg,  
+    Proceedings of Medinfo 2013, http://dx.doi.org/10.3233/978-1-61499-289-9-1160
+4.  TODO: Add SHI 2012-papers?
 
 The first paper explains the general visualization principles used.
 The second paper explains the current implementation and target usecase.
